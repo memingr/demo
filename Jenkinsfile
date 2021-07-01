@@ -1,12 +1,6 @@
 pipeline {
-  agent {
-        docker {
-            image 'openjdk:11'
-            args '-v "$PWD":/app'
-            reuseNode true
-        }
-    }
-    
+  agent any
+
   stages {
     stage('Unit & Integration Tests') {
       steps {
@@ -16,10 +10,26 @@ pipeline {
       }
     }
   }
+
+  stages {
+        stage('Build') {
+      agent {
+        docker {
+          image 'gradle:7.1-jdk11'
+          reuseNode true
+        }
+      }
+      steps {
+        sh 'gradle clean build'
+      }
+        }
+  }
+
   post {
     always {
       archiveArtifacts artifacts: 'build/libs/**/*.jar', fingerprint: true
       junit '**/build/test-results/test/*.xml'
     }
   }
+
 }
