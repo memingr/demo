@@ -1,15 +1,6 @@
 pipeline {
   agent any
 
-  stages {
-    stage('Unit & Integration Tests') {
-      steps {
-        script {
-          sh './gradlew clean build --no-daemon' //run a gradle task
-        }
-      }
-    }
-  }
 
   stages {
         stage('Build') {
@@ -20,7 +11,7 @@ pipeline {
         }
       }
       steps {
-        sh 'gradle clean build'
+        sh 'gradle build --no-daemon'
       }
         }
   }
