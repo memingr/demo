@@ -1,28 +1,25 @@
 pipeline {
-
-    agent any
-
+  agent {
+        docker {
+            image 'openjdk:11'
+            args '-v "$PWD":/app'
+            reuseNode true
+        }
+    }
     
-    stages {
-        stage('Unit & Integration Tests') {
-            steps {
-                script {
-                    try {
-                        sh './gradlew clean build --no-daemon' //run a gradle task
-                    } finally {
-                        junit '**/build/test-results/test/*.xml' //make the junit test results available in any case (success & failure)
-                    }
-                }
-            }
+  stages {
+    stage('Unit & Integration Tests') {
+      steps {
+        script {
+          sh './gradlew clean build --no-daemon' //run a gradle task
         }
-        
+      }
     }
-    post {
-        always { //Send an email to the person that broke the build
-            archiveArtifacts artifacts: 'build/libs/**/*.jar', fingerprint: true
-            step([$class                  : 'Mailer',
-                  notifyEveryUnstableBuild: true,
-                  recipients              : [emailextrecipients([[$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']])].join(' ')])
-        }
+  }
+  post {
+    always {
+      archiveArtifacts artifacts: 'build/libs/**/*.jar', fingerprint: true
+      junit '**/build/test-results/test/*.xml'
     }
+  }
 }
