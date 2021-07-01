@@ -19,6 +19,7 @@ pipeline {
     }
     post {
         always { //Send an email to the person that broke the build
+            archiveArtifacts artifacts: 'build/libs/**/*.jar', fingerprint: true
             step([$class                  : 'Mailer',
                   notifyEveryUnstableBuild: true,
                   recipients              : [emailextrecipients([[$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']])].join(' ')])
